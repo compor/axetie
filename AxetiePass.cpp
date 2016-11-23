@@ -74,8 +74,7 @@ struct Axetie : public llvm::ModulePass {
       auto arg_func_ty = llvm::FunctionType::get(arg_fun_ret_ty, arg_func_params_ty, false);
 
       auto ret_ty = llvm::Type::getInt32Ty(*CurContext);
-      auto params_ty = { static_cast<llvm::Type *>(arg_func_ty->getPointerTo()) };
-      auto atexit_ty = llvm::FunctionType::get(ret_ty, params_ty, false);
+      auto atexit_ty = llvm::FunctionType::get(ret_ty, false);
 
       auto atexit = llvm::Function::Create(atexit_ty,
                                             llvm::GlobalValue::ExternalLinkage,
@@ -89,9 +88,8 @@ struct Axetie : public llvm::ModulePass {
     llvm::Function *createExitHandlerProto(const llvm::StringRef &name) {
       assert(nullptr != CurContext);
 
-      auto params_ty = { llvm::Type::getVoidTy(*CurContext) };
       auto ret_ty = llvm::Type::getVoidTy(*CurContext);
-      auto atexit_handler_ty = llvm::FunctionType::get(ret_ty, params_ty, false);
+      auto atexit_handler_ty = llvm::FunctionType::get(ret_ty, false);
 
       auto atexit_handler = llvm::Function::Create(atexit_handler_ty,
                                             llvm::GlobalValue::ExternalLinkage,
