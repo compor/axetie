@@ -53,5 +53,5 @@ endif()
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 
-add_library(LLVM${PROJECT_NAME}Pass MODULE AxetiePass.cpp)
+add_library(LLVM${PROJECT_NAME} MODULE AxetiePass.cpp)
 
