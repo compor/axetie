@@ -77,7 +77,8 @@ namespace {
 
       auto arg_fun_ret_ty = llvm::Type::getVoidTy(*CurContext);
       auto arg_func_params_ty = { llvm::Type::getVoidTy(*CurContext) };
-      auto arg_func_ty = llvm::FunctionType::get(arg_fun_ret_ty, arg_func_params_ty, false);
+      auto arg_func_ty = llvm::FunctionType::get(arg_fun_ret_ty,
+                                                 arg_func_params_ty, false);
 
       auto ret_ty = llvm::Type::getInt32Ty(*CurContext);
       auto atexit_ty = llvm::FunctionType::get(ret_ty, false);
@@ -98,8 +99,8 @@ namespace {
       auto atexit_handler_ty = llvm::FunctionType::get(ret_ty, false);
 
       auto atexit_handler = llvm::Function::Create(atexit_handler_ty,
-                                            llvm::GlobalValue::ExternalLinkage,
-                                            name);
+                                                   llvm::GlobalValue::ExternalLinkage,
+                                                   name);
 
       atexit_handler->print(llvm::errs());
 
@@ -107,7 +108,8 @@ namespace {
     }
 
     llvm::CallInst *createAtexitCall(const llvm::StringRef &name) {
-      auto params = { static_cast<llvm::Value *>(this->createExitHandlerProto(name)) };
+      auto params = {
+        static_cast<llvm::Value*>(this->createExitHandlerProto(name)) };
       auto atexit = this->createAtexitProto();
 
       auto call = llvm::CallInst::Create(atexit, params,
