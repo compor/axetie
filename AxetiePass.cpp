@@ -7,6 +7,7 @@
 // using llvm::Module
 
 #include "llvm/IR/Function.h"
+// using llvm::Function
 
 #include "llvm/IR/LegacyPassManager.h"
 // using llvm::legacy::PassManagerBase
@@ -17,6 +18,8 @@
 
 #include "llvm/Support/raw_ostream.h"
 // using llvm::errs
+
+
 
 namespace {
 
