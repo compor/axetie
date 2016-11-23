@@ -1,30 +1,32 @@
 
 #include "llvm/Pass.h"
-#include "llvm/IR/Type.h"
+// using llvm::RegisterPass
+// using llvm::ModulePass
+
+#include "llvm/IR/Module.h"
+// using llvm::Module
+
 #include "llvm/IR/Function.h"
-#include "llvm/Support/raw_ostream.h"
 
 #include "llvm/IR/LegacyPassManager.h"
+// using llvm::legacy::PassManagerBase
+
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
+// using llvm::PassManagerBuilder
+// using llvm::RegisterStandardPasses
 
-
-using namespace llvm;
+#include "llvm/Support/raw_ostream.h"
+// using llvm::errs
 
 namespace {
 
-struct Axetie : public FunctionPass {
+struct Axetie : public llvm::ModulePass {
     static char ID;
 
-    Axetie() : FunctionPass(ID) {}
+      Axetie() : llvm::ModulePass(ID) {}
 
-    bool runOnFunction(Function &f) override {
-        errs() << "Axetie pass : ";
-        errs() << " function name : ";
-        errs().write_escaped(f.getName());
-        auto ret_type = f.getReturnType();
-        errs() << "\twith ret type : ";
-        ret_type->print(errs());
-        errs() << "\n";
+      bool runOnModule(llvm::Module &f) override {
+        llvm::errs() << "Axetie pass : \n";
 
         return false;
     }
@@ -34,17 +36,17 @@ struct Axetie : public FunctionPass {
 
 
 char Axetie::ID = 0;
-static RegisterPass<Axetie> X("axetie", "Axetie Pass", false, false);
+static llvm::RegisterPass<Axetie> X("axetie", "Axetie Pass", false, false);
 
 
-static void registerAxetiePass(const PassManagerBuilder &Builder,
-                               legacy::PassManagerBase &PM) {
+static void registerAxetiePass(const llvm::PassManagerBuilder &Builder,
+                               llvm::legacy::PassManagerBase &PM) {
   PM.add(new Axetie());
 
   return;
 }
 
 
-static RegisterStandardPasses RegisterAxetiePass(
-  PassManagerBuilder::EP_EarlyAsPossible, registerAxetiePass);
+static llvm::RegisterStandardPasses RegisterAxetiePass(
+  llvm::PassManagerBuilder::EP_EarlyAsPossible, registerAxetiePass);
 
