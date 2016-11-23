@@ -3,6 +3,9 @@
 // using llvm::RegisterPass
 // using llvm::ModulePass
 
+#include "llvm/IR/LLVMContext.h"
+// using llvm::LLVMContext
+
 #include "llvm/IR/Module.h"
 // using llvm::Module
 
@@ -31,8 +34,11 @@ namespace {
 
 struct Axetie : public llvm::ModulePass {
     static char ID;
+    llvm::LLVMContext *CurContext;
 
-    Axetie() : llvm::ModulePass(ID) {}
+    Axetie() : llvm::ModulePass(ID) {
+      CurContext = nullptr;
+    }
 
     const llvm::Function *getEntryFunction(const llvm::Module &module) {
       for (auto &CurFunc : module) {
@@ -45,6 +51,8 @@ struct Axetie : public llvm::ModulePass {
 
     bool runOnModule(llvm::Module &CurModule) override {
       llvm::errs() << "Axetie pass : \n";
+
+      CurContext = CurModule.getContext();
 
       auto entry = getEntryFunction(CurModule);
       if (!entry) return false;
