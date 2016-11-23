@@ -108,6 +108,8 @@ namespace {
     }
 
     llvm::CallInst *createAtexitCall(const llvm::StringRef &name) {
+      assert(name.compare(atexit_func_name) != 0);
+
       auto params = {
         static_cast<llvm::Value*>(this->createExitHandlerProto(name)) };
       auto atexit = this->createAtexitProto();
@@ -117,7 +119,20 @@ namespace {
                                                      atexit_func_rc_suffix));
 
       call->print(llvm::errs());
+
       return call;
+    }
+
+    bool addAtexitCall(const llvm::ArrayRef<const char *> names, llvm::Instruction *insert_pos) {
+      bool status = false;
+
+      for (const auto &name : names) {
+        auto call = createAtexitCall(name);
+        insert_pos->insertBefore(call);
+        status = true;
+      }
+
+      return status;
     }
 
     bool runOnModule(llvm::Module &CurModule) override {
