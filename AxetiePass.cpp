@@ -18,6 +18,9 @@
 #include "llvm/IR/Instruction.h"
 // using llvm::Instruction
 
+#include "llvm/IR/Instructions.h"
+// using llvm::CallInst
+
 #include "llvm/IR/LegacyPassManager.h"
 // using llvm::legacy::PassManagerBase
 
@@ -100,6 +103,16 @@ struct Axetie : public llvm::ModulePass {
       return atexit_handler;
     }
 
+    llvm::CallInst *createAtexitCall(const llvm::StringRef &name) {
+      auto params = { static_cast<llvm::Value *>(this->createExitHandlerProto(name)) };
+      auto atexit = this->createAtexitProto();
+
+      auto call = llvm::CallInst::Create(atexit, params);
+
+      call->print(llvm::errs());
+      return call;
+    }
+
     bool runOnModule(llvm::Module &CurModule) override {
       llvm::errs() << "Axetie pass : \n";
 
@@ -109,8 +122,7 @@ struct Axetie : public llvm::ModulePass {
       if (!entry) return false;
 
       llvm::errs() << entry->getName() << "\n";
-      createExitHandlerProto("foo");
-      createAtexitProto();
+      createAtexitCall("foo");
 
       const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
 
