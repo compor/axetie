@@ -26,12 +26,23 @@ namespace {
 struct Axetie : public llvm::ModulePass {
     static char ID;
 
-      Axetie() : llvm::ModulePass(ID) {}
+    Axetie() : llvm::ModulePass(ID) {}
 
-      bool runOnModule(llvm::Module &f) override {
-        llvm::errs() << "Axetie pass : \n";
+    const llvm::Function *getEntryFunction(const llvm::Module &module) {
+      for (auto &CurFunc : module) {
+        llvm::errs() << "current function: " << CurFunc.getName() << "\n";
 
-        return false;
+        if (CurFunc.getName().compare("main") == 0)
+          return &CurFunc;
+      }
+
+      return nullptr;
+    }
+
+    bool runOnModule(llvm::Module &CurModule) override {
+      llvm::errs() << "Axetie pass : \n";
+
+      return false;
     }
 };
 
