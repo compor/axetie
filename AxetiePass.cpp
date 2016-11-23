@@ -37,8 +37,8 @@
 #include "llvm/ADT/StringRef.h"
 // using llvm::StringRef
 
-#include "llvm/ADT/StringRef.h"
-// using llvm::StringRef
+#include "llvm/ADT/Twine.h"
+// using llvm::Twine
 
 #include "llvm/Support/raw_ostream.h"
 // using llvm::errs
@@ -52,9 +52,12 @@
 
 namespace {
 
-struct Axetie : public llvm::ModulePass {
+  struct Axetie : public llvm::ModulePass {
     static char ID;
     llvm::LLVMContext *CurContext;
+
+    const char *atexit_func_name = "atexit";
+    const char *atexit_func_rc_suffix = "_rc";
 
     Axetie() : llvm::ModulePass(ID) {
       CurContext = nullptr;
@@ -80,8 +83,8 @@ struct Axetie : public llvm::ModulePass {
       auto atexit_ty = llvm::FunctionType::get(ret_ty, false);
 
       auto atexit = llvm::Function::Create(atexit_ty,
-                                            llvm::GlobalValue::ExternalLinkage,
-                                            "atexit");
+                                           llvm::GlobalValue::ExternalLinkage,
+                                           atexit_func_name);
 
       atexit->print(llvm::errs());
 
@@ -107,7 +110,9 @@ struct Axetie : public llvm::ModulePass {
       auto params = { static_cast<llvm::Value *>(this->createExitHandlerProto(name)) };
       auto atexit = this->createAtexitProto();
 
-      auto call = llvm::CallInst::Create(atexit, params);
+      auto call = llvm::CallInst::Create(atexit, params,
+                                         llvm::Twine(llvm::StringRef(atexit_func_name),
+                                                     atexit_func_rc_suffix));
 
       call->print(llvm::errs());
       return call;
