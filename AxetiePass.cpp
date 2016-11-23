@@ -66,6 +66,26 @@ struct Axetie : public llvm::ModulePass {
       return nullptr;
     }
 
+    llvm::Function *createAtexitProto() {
+      assert(nullptr != CurContext);
+
+      auto arg_fun_ret_ty = llvm::Type::getVoidTy(*CurContext);
+      auto arg_func_params_ty = { llvm::Type::getVoidTy(*CurContext) };
+      auto arg_func_ty = llvm::FunctionType::get(arg_fun_ret_ty, arg_func_params_ty, false);
+
+      auto ret_ty = llvm::Type::getInt32Ty(*CurContext);
+      auto params_ty = { static_cast<llvm::Type *>(arg_func_ty->getPointerTo()) };
+      auto atexit_ty = llvm::FunctionType::get(ret_ty, params_ty, false);
+
+      auto atexit = llvm::Function::Create(atexit_ty,
+                                            llvm::GlobalValue::ExternalLinkage,
+                                            "atexit");
+
+      atexit->print(llvm::errs());
+
+      return atexit;
+    }
+
     llvm::Function *createExitHandlerProto(const llvm::StringRef &name) {
       assert(nullptr != CurContext);
 
@@ -92,6 +112,7 @@ struct Axetie : public llvm::ModulePass {
 
       llvm::errs() << entry->getName() << "\n";
       createExitHandlerProto("foo");
+      createAtexitProto();
 
       const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
 
