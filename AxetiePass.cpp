@@ -9,6 +9,12 @@
 #include "llvm/IR/Function.h"
 // using llvm::Function
 
+#include "llvm/IR/BasicBlock.h"
+// using llvm::BasicBlock
+
+#include "llvm/IR/Instruction.h"
+// using llvm::Instruction
+
 #include "llvm/IR/LegacyPassManager.h"
 // using llvm::legacy::PassManagerBase
 
@@ -30,8 +36,6 @@ struct Axetie : public llvm::ModulePass {
 
     const llvm::Function *getEntryFunction(const llvm::Module &module) {
       for (auto &CurFunc : module) {
-        llvm::errs() << "current function: " << CurFunc.getName() << "\n";
-
         if (CurFunc.getName().compare("main") == 0)
           return &CurFunc;
       }
@@ -42,7 +46,14 @@ struct Axetie : public llvm::ModulePass {
     bool runOnModule(llvm::Module &CurModule) override {
       llvm::errs() << "Axetie pass : \n";
 
-      return false;
+      auto entry = getEntryFunction(CurModule);
+      if (!entry) return false;
+
+      llvm::errs() << entry->getName() << "\n";
+
+      const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
+
+      return true;
     }
 };
 
