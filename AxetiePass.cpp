@@ -74,13 +74,13 @@ namespace {
 
   struct Axetie : public llvm::ModulePass {
     static char ID;
-    llvm::LLVMContext *CurContext;
+    llvm::LLVMContext *cur_context;
 
     const char *atexit_func_name = "atexit";
     const char *atexit_func_rc_suffix = "_rc";
 
     Axetie() : llvm::ModulePass(ID) {
-      CurContext = nullptr;
+      cur_context = nullptr;
     }
 
     const llvm::Function *getEntryFunction(const llvm::Module &module) {
@@ -93,12 +93,12 @@ namespace {
     }
 
     llvm::Function *createAtexitProto() {
-      assert(nullptr != CurContext);
+      assert(nullptr != cur_context);
 
-      auto arg_func_ret_ty = llvm::Type::getVoidTy(*CurContext);
+      auto arg_func_ret_ty = llvm::Type::getVoidTy(*cur_context);
       auto arg_func_ty = llvm::FunctionType::get(arg_func_ret_ty, false)->getPointerTo();
 
-      auto ret_ty = llvm::Type::getInt32Ty(*CurContext);
+      auto ret_ty = llvm::Type::getInt32Ty(*cur_context);
       auto atexit_ty = llvm::FunctionType::get(ret_ty, arg_func_ty, false);
 
       auto atexit = llvm::Function::Create(atexit_ty,
@@ -111,9 +111,9 @@ namespace {
     }
 
     llvm::Function *createExitHandlerProto(const llvm::StringRef &name) {
-      assert(nullptr != CurContext);
+      assert(nullptr != cur_context);
 
-      auto ret_ty = llvm::Type::getVoidTy(*CurContext);
+      auto ret_ty = llvm::Type::getVoidTy(*cur_context);
       auto atexit_handler_ty = llvm::FunctionType::get(ret_ty, false);
 
       auto atexit_handler = llvm::Function::Create(atexit_handler_ty,
@@ -178,14 +178,14 @@ namespace {
       return;
     }
 
-    bool runOnModule(llvm::Module &CurModule) override {
+    bool runOnModule(llvm::Module &cur_module) override {
       PLUGIN_OUT << "Axetie pass : \n";
 
       bool is_modified = false;
 
-      CurContext = &CurModule.getContext();
+      cur_context = &cur_module.getContext();
 
-      auto entry = getEntryFunction(CurModule);
+      auto entry = getEntryFunction(cur_module);
       if (!entry) return false;
 
       PLUGIN_OUT << entry->getName() << "\n";
