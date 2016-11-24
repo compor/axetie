@@ -45,7 +45,9 @@
 // using llvm::Twine
 
 #include "llvm/Support/raw_ostream.h"
+// using llvm::outs
 // using llvm::errs
+// using llvm::dbgs
 
 
 #include <utility>
