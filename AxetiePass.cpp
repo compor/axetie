@@ -128,6 +128,7 @@ namespace {
                                                      atexit_func_rc_suffix));
 
       call->print(PLUGIN_OUT);
+      PLUGIN_OUT << "\n";
 
       return call;
     }
@@ -153,7 +154,6 @@ namespace {
       if (!entry) return false;
 
       PLUGIN_OUT << entry->getName() << "\n";
-      createAtexitCall("foo");
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
