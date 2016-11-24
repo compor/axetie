@@ -116,15 +116,14 @@ namespace {
       return atexit_handler;
     }
 
-    llvm::CallInst *createAtexitCall(const llvm::Function &atexit_proto,
-                                     const llvm::StringRef &name) {
+    llvm::CallInst *createAtexitCall(const llvm::StringRef &name) {
       assert(name.compare(atexit_func_name) != 0);
 
       auto params = {
         static_cast<llvm::Value*>(this->createExitHandlerProto(name)) };
+      auto atexit = this->createAtexitProto();
 
-      auto call = llvm::CallInst::Create(const_cast<llvm::Function*>(&atexit_proto),
-                                         params,
+      auto call = llvm::CallInst::Create(atexit, params,
                                          llvm::Twine(llvm::StringRef(atexit_func_name),
                                                      atexit_func_rc_suffix));
 
@@ -133,14 +132,11 @@ namespace {
       return call;
     }
 
-    bool addAtexitCall(const llvm::Function &atexit_proto,
-                       const llvm::ArrayRef<const char *> &names,
-                       llvm::Instruction *insert_pos) {
+    bool addAtexitCall(const llvm::ArrayRef<const char *> names, llvm::Instruction *insert_pos) {
       bool modified = false;
 
       for (const auto &name : names) {
-        auto call = createAtexitCall(atexit_proto, name);
-        PLUGIN_OUT << *call << "\n";
+        auto call = createAtexitCall(name);
         insert_pos->insertBefore(call);
         modified = true;
       }
@@ -156,13 +152,10 @@ namespace {
       auto entry = getEntryFunction(CurModule);
       if (!entry) return false;
 
-      auto atexit_proto = createAtexitProto();
       PLUGIN_OUT << entry->getName() << "\n";
+      createAtexitCall("foo");
 
       const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
-
-      auto modified = addAtexitCall(*atexit_proto, { "qux" },
-                                    const_cast<llvm::Instruction*>(&*insertion_pt));
 
       return true;
     }
