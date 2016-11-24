@@ -47,6 +47,9 @@
 // using llvm::errs
 
 
+#include <utility>
+// using std::pair
+
 #include <cassert>
 // using assert
 
@@ -119,7 +122,8 @@ namespace {
       return atexit_handler;
     }
 
-    llvm::CallInst *createAtexitCall(const llvm::StringRef &name) {
+    std::pair<llvm::CallInst *, llvm::Function *>
+    createAtexitCall(const llvm::StringRef &name) {
       assert(name.compare(atexit_func_name) != 0);
 
       auto params = {
@@ -133,7 +137,7 @@ namespace {
       call->print(PLUGIN_OUT);
       PLUGIN_OUT << "\n";
 
-      return call;
+      return std::make_pair(call, atexit);
     }
 
     bool addAtexitCall(const llvm::ArrayRef<const char *> names,
@@ -142,14 +146,21 @@ namespace {
       bool is_added = false;
 
       for (const auto &name : names) {
-        auto call = createAtexitCall(name);
+        auto r = createAtexitCall(name);
+        auto call = r.first;
+        auto callee = r.second;
         call->insertBefore(insert_pos);
+
+        auto cur_module = call->getParent()->getParent()->getParent();
+
+        cur_module->getOrInsertFunction(callee->getName(),
+                                        callee->getFunctionType());
+
         is_modified = true;
 
         if (!is_added) {
           is_added = true;
 
-          auto cur_module = call->getParent()->getParent()->getParent();
           cur_module->getOrInsertFunction(
             call->getCalledFunction()->getName(), call->getFunctionType());
         }
