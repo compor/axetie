@@ -48,6 +48,17 @@
 // using assert
 
 
+#define DEBUG_TYPE "axetie"
+
+
+#ifndef NDEBUG
+  #define PLUGIN_OUT llvm::outs()
+  //#define PLUGIN_OUT llvm::nulls()
+#else // NDEBUG
+  #define PLUGIN_OUT llvm::dbgs()
+#endif // NDEBUG
+
+#define PLUGIN_ERR llvm::errs()
 
 
 namespace {
