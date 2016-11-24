@@ -129,8 +129,10 @@ namespace {
     createAtexitCall(const llvm::StringRef &name) {
       assert(name.compare(atexit_func_name) != 0);
 
+      auto handler = this->createExitHandlerProto(name);
+
       auto params = {
-        static_cast<llvm::Value*>(this->createExitHandlerProto(name)) };
+        static_cast<llvm::Value*>(handler) };
       auto atexit = this->createAtexitProto();
 
       auto call = llvm::CallInst::Create(atexit, params,
@@ -140,7 +142,7 @@ namespace {
       call->print(PLUGIN_OUT);
       PLUGIN_OUT << "\n";
 
-      return std::make_pair(call, atexit);
+      return std::make_pair(call, handler);
     }
 
     bool addAtexitCall(const llvm::ArrayRef<const char *> names,
