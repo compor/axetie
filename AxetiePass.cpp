@@ -124,15 +124,15 @@ namespace {
     }
 
     bool addAtexitCall(const llvm::ArrayRef<const char *> names, llvm::Instruction *insert_pos) {
-      bool status = false;
+      bool modified = false;
 
       for (const auto &name : names) {
         auto call = createAtexitCall(name);
         insert_pos->insertBefore(call);
-        status = true;
+        modified = true;
       }
 
-      return status;
+      return modified;
     }
 
     bool runOnModule(llvm::Module &CurModule) override {
