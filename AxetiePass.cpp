@@ -98,7 +98,7 @@ namespace {
                                            llvm::GlobalValue::ExternalLinkage,
                                            atexit_func_name);
 
-      atexit->print(llvm::errs());
+      atexit->print(PLUGIN_OUT);
 
       return atexit;
     }
@@ -113,7 +113,7 @@ namespace {
                                                    llvm::GlobalValue::ExternalLinkage,
                                                    name);
 
-      atexit_handler->print(llvm::errs());
+      atexit_handler->print(PLUGIN_OUT);
 
       return atexit_handler;
     }
@@ -129,7 +129,7 @@ namespace {
                                          llvm::Twine(llvm::StringRef(atexit_func_name),
                                                      atexit_func_rc_suffix));
 
-      call->print(llvm::errs());
+      call->print(PLUGIN_OUT);
 
       return call;
     }
@@ -147,14 +147,14 @@ namespace {
     }
 
     bool runOnModule(llvm::Module &CurModule) override {
-      llvm::errs() << "Axetie pass : \n";
+      PLUGIN_OUT << "Axetie pass : \n";
 
       CurContext = &CurModule.getContext();
 
       auto entry = getEntryFunction(CurModule);
       if (!entry) return false;
 
-      llvm::errs() << entry->getName() << "\n";
+      PLUGIN_OUT << entry->getName() << "\n";
       createAtexitCall("foo");
 
       const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
