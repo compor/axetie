@@ -148,6 +148,8 @@ namespace {
     bool runOnModule(llvm::Module &CurModule) override {
       PLUGIN_OUT << "Axetie pass : \n";
 
+      bool is_modified = false;
+
       CurContext = &CurModule.getContext();
 
       auto entry = getEntryFunction(CurModule);
@@ -157,9 +159,9 @@ namespace {
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
-      addAtexitCall({ "qux", "baz" }, &*insertion_pt);
+      is_modified = addAtexitCall({ "qux", "baz" }, &*insertion_pt);
 
-      return true;
+      return is_modified;
     }
 };
 
