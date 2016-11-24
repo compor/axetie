@@ -87,10 +87,10 @@ namespace {
       assert(nullptr != CurContext);
 
       auto arg_func_ret_ty = llvm::Type::getVoidTy(*CurContext);
-      auto arg_func_ty = llvm::FunctionType::get(arg_func_ret_ty, false);
+      auto arg_func_ty = llvm::FunctionType::get(arg_func_ret_ty, false)->getPointerTo();
 
       auto ret_ty = llvm::Type::getInt32Ty(*CurContext);
-      auto atexit_ty = llvm::FunctionType::get(ret_ty, false);
+      auto atexit_ty = llvm::FunctionType::get(ret_ty, arg_func_ty, false);
 
       auto atexit = llvm::Function::Create(atexit_ty,
                                            llvm::GlobalValue::ExternalLinkage,
