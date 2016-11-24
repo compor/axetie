@@ -138,7 +138,7 @@ namespace {
 
       for (const auto &name : names) {
         auto call = createAtexitCall(name);
-        insert_pos->insertBefore(call);
+        call->insertBefore(insert_pos);
         modified = true;
       }
 
