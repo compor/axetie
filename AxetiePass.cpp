@@ -2,6 +2,7 @@
 #include "llvm/Pass.h"
 // using llvm::RegisterPass
 // using llvm::ModulePass
+// using llvm::AnalysisUsage
 
 #include "llvm/IR/LLVMContext.h"
 // using llvm::LLVMContext
@@ -167,6 +168,12 @@ namespace {
       }
 
       return is_modified;
+    }
+
+    void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
+      AU.setPreservesCFG();
+
+      return;
     }
 
     bool runOnModule(llvm::Module &CurModule) override {
