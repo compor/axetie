@@ -153,14 +153,13 @@ namespace {
       for (const auto &name : names) {
         auto r = createAtexitCall(name);
         auto call = r.first;
-        auto callee = r.second;
+        auto handler = r.second;
         call->insertBefore(insert_pos);
 
         auto cur_module = call->getParent()->getParent()->getParent();
 
-        cur_module->getOrInsertFunction(callee->getName(),
-                                        callee->getFunctionType());
-
+        cur_module->getOrInsertFunction(handler->getName(),
+                                        handler->getFunctionType());
         is_modified = true;
 
         if (!is_added) {
@@ -195,6 +194,8 @@ namespace {
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
       is_modified = addAtexitCall({ "qux", "baz" }, &*insertion_pt);
+
+      //cur_module.dump();
 
       return is_modified;
     }
