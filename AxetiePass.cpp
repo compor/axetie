@@ -133,16 +133,26 @@ namespace {
       return call;
     }
 
-    bool addAtexitCall(const llvm::ArrayRef<const char *> names, llvm::Instruction *insert_pos) {
-      bool modified = false;
+    bool addAtexitCall(const llvm::ArrayRef<const char *> names,
+                       llvm::Instruction *insert_pos) {
+      bool is_modified = false;
+      bool is_added = false;
 
       for (const auto &name : names) {
         auto call = createAtexitCall(name);
         call->insertBefore(insert_pos);
-        modified = true;
+        is_modified = true;
+
+        if (!is_added) {
+          is_added = true;
+
+          auto cur_module = call->getParent()->getParent()->getParent();
+          cur_module->getOrInsertFunction(
+            call->getCalledFunction()->getName(), call->getFunctionType());
+        }
       }
 
-      return modified;
+      return is_modified;
     }
 
     bool runOnModule(llvm::Module &CurModule) override {
