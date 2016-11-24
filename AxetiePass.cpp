@@ -155,7 +155,9 @@ namespace {
       PLUGIN_OUT << entry->getName() << "\n";
       createAtexitCall("foo");
 
-      const auto &insertion_pt = entry->getEntryBlock().getFirstInsertionPt();
+      auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
+
+      addAtexitCall({ "qux", "baz" }, &*insertion_pt);
 
       return true;
     }
