@@ -21,6 +21,9 @@
 #include "llvm/IR/Instructions.h"
 // using llvm::CallInst
 
+#include "llvm/IR/Value.h"
+// using llvm::Value
+
 #include "llvm/IR/LegacyPassManager.h"
 // using llvm::legacy::PassManagerBase
 
