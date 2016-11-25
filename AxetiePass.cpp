@@ -54,6 +54,9 @@
 // using llvm::errs
 // using llvm::dbgs
 
+#include "llvm/Support/Debug.h"
+// using DEBUG macros
+
 
 #include <utility>
 // using std::pair
@@ -68,6 +71,10 @@
 #ifndef NDEBUG
   #define PLUGIN_OUT llvm::outs()
   //#define PLUGIN_OUT llvm::nulls()
+
+  // convenience macro when building against a NDEBUG LLVM
+  #undef DEBUG
+  #define DEBUG(X) do { X; } while(0);
 #else // NDEBUG
   #define PLUGIN_OUT llvm::dbgs()
 #endif // NDEBUG
@@ -115,7 +122,7 @@ namespace {
                                               atexit_func_name, &module);
       }
 
-      atexit_found->print(PLUGIN_OUT);
+      DEBUG(atexit_found->print(PLUGIN_OUT));
 
       return atexit_found;
     }
@@ -131,7 +138,7 @@ namespace {
                                                    llvm::GlobalValue::ExternalLinkage,
                                                    name, &module);
 
-      atexit_handler->print(PLUGIN_OUT);
+      DEBUG(atexit_handler->print(PLUGIN_OUT));
 
       return atexit_handler;
     }
@@ -150,8 +157,8 @@ namespace {
                                          llvm::Twine(llvm::StringRef(atexit_func_name),
                                                      atexit_func_rc_suffix));
 
-      call->print(PLUGIN_OUT);
-      PLUGIN_OUT << "\n";
+      DEBUG(call->print(PLUGIN_OUT));
+      DEBUG(PLUGIN_OUT << "\n");
 
       return std::make_pair(call, handler);
     }
@@ -192,7 +199,7 @@ namespace {
     }
 
     bool runOnModule(llvm::Module &cur_module) override {
-      PLUGIN_OUT << "Axetie pass : \n";
+      DEBUG(PLUGIN_OUT << "Axetie pass : \n");
 
       bool is_modified = false;
 
@@ -201,15 +208,14 @@ namespace {
       auto entry = getEntryFunction(cur_module);
       if (!entry) return false;
 
-      PLUGIN_OUT << entry->getName() << "\n";
+      DEBUG(PLUGIN_OUT << entry->getName() << "\n");
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
       is_modified = addAtexitCall({ "qux", "baz" }, *insertion_pt);
 
-      //cur_module.dump();
 #ifndef NDEBUG
-      llvm::verifyModule(cur_module, &(PLUGIN_OUT));
+      llvm::verifyModule(cur_module, &(PLUGIN_ERR));
 #endif // NDEBUG
 
       return is_modified;
