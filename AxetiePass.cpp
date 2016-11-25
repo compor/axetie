@@ -150,8 +150,8 @@ namespace {
       return std::make_pair(call, handler);
     }
 
-    bool addAtexitCall(const llvm::ArrayRef<const char *> names,
-                       llvm::Instruction *insert_pos) {
+    bool addAtexitCall(const llvm::ArrayRef<const char *> &names,
+                       llvm::Instruction &insert_pos) {
       bool is_modified = false;
       bool is_added = false;
 
@@ -159,7 +159,7 @@ namespace {
         auto r = createAtexitCall(name);
         auto call = r.first;
         auto handler = r.second;
-        call->insertBefore(insert_pos);
+        call->insertBefore(&insert_pos);
 
         auto cur_module = call->getParent()->getParent()->getParent();
 
@@ -198,7 +198,7 @@ namespace {
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
-      is_modified = addAtexitCall({ "qux", "baz" }, &*insertion_pt);
+      is_modified = addAtexitCall({ "qux", "baz" }, *insertion_pt);
 
       //cur_module.dump();
 #ifndef NDEBUG
