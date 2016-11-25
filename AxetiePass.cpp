@@ -100,19 +100,24 @@ namespace {
     llvm::Function *createAtexitProto(llvm::Module &module) {
       assert(nullptr != cur_context);
 
-      auto arg_func_ret_ty = llvm::Type::getVoidTy(*cur_context);
-      auto arg_func_ty = llvm::FunctionType::get(arg_func_ret_ty, false)->getPointerTo();
+      //TODO there should be a more elaborate type check here
+      auto atexit_found = module.getFunction(atexit_func_name);
 
-      auto ret_ty = llvm::Type::getInt32Ty(*cur_context);
-      auto atexit_ty = llvm::FunctionType::get(ret_ty, arg_func_ty, false);
+      if (!atexit_found) {
+        auto arg_func_ret_ty = llvm::Type::getVoidTy(*cur_context);
+        auto arg_func_ty = llvm::FunctionType::get(arg_func_ret_ty, false)->getPointerTo();
 
-      auto atexit = llvm::Function::Create(atexit_ty,
-                                           llvm::GlobalValue::ExternalLinkage,
-                                           atexit_func_name, &module);
+        auto ret_ty = llvm::Type::getInt32Ty(*cur_context);
+        auto atexit_ty = llvm::FunctionType::get(ret_ty, arg_func_ty, false);
 
-      atexit->print(PLUGIN_OUT);
+        atexit_found = llvm::Function::Create(atexit_ty,
+                                              llvm::GlobalValue::ExternalLinkage,
+                                              atexit_func_name, &module);
+      }
 
-      return atexit;
+      atexit_found->print(PLUGIN_OUT);
+
+      return atexit_found;
     }
 
     llvm::Function *createExitHandlerProto(const llvm::StringRef &name,
