@@ -88,7 +88,7 @@ namespace {
       cur_context = nullptr;
     }
 
-    const llvm::Function *getEntryFunction(const llvm::Module &module) {
+    const llvm::Function *getEntryFunction(const llvm::Module &module) const {
       for (auto &CurFunc : module) {
         if (CurFunc.getName().compare("main") == 0)
           return &CurFunc;
