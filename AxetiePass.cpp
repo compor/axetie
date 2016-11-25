@@ -155,13 +155,14 @@ namespace {
       bool is_modified = false;
       bool is_added = false;
 
+      auto cur_module = insert_pos.getParent()->getParent()->getParent();
+      assert(nullptr != cur_module);
+
       for (const auto &name : names) {
         auto r = createAtexitCall(name);
         auto call = r.first;
         auto handler = r.second;
         call->insertBefore(&insert_pos);
-
-        auto cur_module = call->getParent()->getParent()->getParent();
 
         cur_module->getOrInsertFunction(handler->getName(),
                                         handler->getFunctionType());
