@@ -97,7 +97,7 @@ namespace {
       return nullptr;
     }
 
-    llvm::Function *createAtexitProto() {
+    llvm::Function *createAtexitProto(llvm::Module &module) {
       assert(nullptr != cur_context);
 
       auto arg_func_ret_ty = llvm::Type::getVoidTy(*cur_context);
@@ -108,14 +108,15 @@ namespace {
 
       auto atexit = llvm::Function::Create(atexit_ty,
                                            llvm::GlobalValue::ExternalLinkage,
-                                           atexit_func_name);
+                                           atexit_func_name, &module);
 
       atexit->print(PLUGIN_OUT);
 
       return atexit;
     }
 
-    llvm::Function *createExitHandlerProto(const llvm::StringRef &name) {
+    llvm::Function *createExitHandlerProto(const llvm::StringRef &name,
+                                           llvm::Module &module) {
       assert(nullptr != cur_context);
 
       auto ret_ty = llvm::Type::getVoidTy(*cur_context);
@@ -123,7 +124,7 @@ namespace {
 
       auto atexit_handler = llvm::Function::Create(atexit_handler_ty,
                                                    llvm::GlobalValue::ExternalLinkage,
-                                                   name);
+                                                   name, &module);
 
       atexit_handler->print(PLUGIN_OUT);
 
@@ -131,14 +132,14 @@ namespace {
     }
 
     std::pair<llvm::CallInst *, llvm::Function *>
-    createAtexitCall(const llvm::StringRef &name) {
+    createAtexitCall(const llvm::StringRef &name, llvm::Module &module) {
       assert(name.compare(atexit_func_name) != 0);
 
-      auto handler = this->createExitHandlerProto(name);
+      auto handler = this->createExitHandlerProto(name, module);
 
       auto params = {
         static_cast<llvm::Value*>(handler) };
-      auto atexit = this->createAtexitProto();
+      auto atexit = this->createAtexitProto(module);
 
       auto call = llvm::CallInst::Create(atexit, params,
                                          llvm::Twine(llvm::StringRef(atexit_func_name),
@@ -159,7 +160,7 @@ namespace {
       assert(nullptr != cur_module);
 
       for (const auto &name : names) {
-        auto r = createAtexitCall(name);
+        auto r = createAtexitCall(name, *cur_module);
         auto call = r.first;
         auto handler = r.second;
         call->insertBefore(&insert_pos);
@@ -171,8 +172,8 @@ namespace {
         if (!is_added) {
           is_added = true;
 
-          cur_module->getOrInsertFunction(
-            call->getCalledFunction()->getName(), call->getFunctionType());
+          cur_module->getOrInsertFunction(call->getCalledFunction()->getName(),
+                                          call->getCalledFunction()->getFunctionType());
         }
       }
 
