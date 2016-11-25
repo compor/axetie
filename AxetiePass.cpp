@@ -38,6 +38,11 @@
 #include "llvm/IR/GlobalValue.h"
 // using llvm::GlobalValue
 
+#ifndef NDEBUG
+#include "llvm/IR/Verifier.h"
+// using llvm::verifyModule
+#endif // NDEBUG
+
 #include "llvm/ADT/StringRef.h"
 // using llvm::StringRef
 
@@ -196,6 +201,9 @@ namespace {
       is_modified = addAtexitCall({ "qux", "baz" }, &*insertion_pt);
 
       //cur_module.dump();
+#ifndef NDEBUG
+      llvm::verifyModule(cur_module, &(PLUGIN_OUT));
+#endif // NDEBUG
 
       return is_modified;
     }
