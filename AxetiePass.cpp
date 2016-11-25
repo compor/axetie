@@ -80,6 +80,7 @@ namespace {
   struct Axetie : public llvm::ModulePass {
     static char ID;
     llvm::LLVMContext *cur_context;
+    llvm::Module *cm;
 
     const char *atexit_func_name = "atexit";
     const char *atexit_func_rc_suffix = "_rc";
@@ -150,29 +151,40 @@ namespace {
       return std::make_pair(call, handler);
     }
 
-    bool addAtexitCall(const llvm::ArrayRef<const char *> names,
-                       llvm::Instruction *insert_pos) {
+    bool addAtexitCall(const llvm::ArrayRef<const char *> &names,
+                       llvm::Instruction &insert_pos) {
       bool is_modified = false;
       bool is_added = false;
+
+      auto cur_module = insert_pos.getParent()->getParent()->getParent();
+      assert(nullptr != cur_module);
+      PLUGIN_OUT << cur_module << "\n";
 
       for (const auto &name : names) {
         auto r = createAtexitCall(name);
         auto call = r.first;
         auto handler = r.second;
-        call->insertBefore(insert_pos);
-
-        auto cur_module = call->getParent()->getParent()->getParent();
 
         cur_module->getOrInsertFunction(handler->getName(),
                                         handler->getFunctionType());
-        is_modified = true;
 
         if (!is_added) {
           is_added = true;
 
-          cur_module->getOrInsertFunction(
-            call->getCalledFunction()->getName(), call->getFunctionType());
+          cur_module->getOrInsertFunction(call->getCalledFunction()->getName(),
+            call->getCalledFunction()->getFunctionType());
         }
+
+        //cur_module->getOrInsertFunction(handler->getName(),
+                                        //handler->getFunctionType());
+
+        auto cm1 = handler->getParent();
+        auto cm2 = call->getCalledFunction()->getParent();
+        PLUGIN_OUT << cm1 << " " << cm2 << "\n";
+
+        call->insertBefore(&insert_pos);
+
+        is_modified = true;
       }
 
       return is_modified;
@@ -186,6 +198,7 @@ namespace {
 
     bool runOnModule(llvm::Module &cur_module) override {
       PLUGIN_OUT << "Axetie pass : \n";
+      cm = &cur_module;
 
       bool is_modified = false;
 
@@ -198,11 +211,14 @@ namespace {
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
-      is_modified = addAtexitCall({ "qux", "baz" }, &*insertion_pt);
+      is_modified = addAtexitCall({ "qux", "baz" }, *insertion_pt);
 
+      //PLUGIN_OUT << "---------\n";
       //cur_module.dump();
+      //PLUGIN_OUT << "---------\n";
+
 #ifndef NDEBUG
-      llvm::verifyModule(cur_module, &(PLUGIN_OUT));
+      //llvm::verifyModule(cur_module, &(PLUGIN_ERR));
 #endif // NDEBUG
 
       return is_modified;
