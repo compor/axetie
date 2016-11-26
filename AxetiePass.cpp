@@ -224,7 +224,7 @@ namespace {
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
-      is_modified = addAtexitCall({ "qux", "baz" }, *insertion_pt);
+      is_modified = addAtexitCall({ atexit_handler_func_name.c_str() }, *insertion_pt);
 
 #ifndef NDEBUG
       llvm::verifyModule(cur_module, &(PLUGIN_ERR));
