@@ -90,7 +90,7 @@
 #define PLUGIN_ERR llvm::errs()
 
 
-llvm::cl::opt<std::string> atexit_handler_func_name("f",
+llvm::cl::opt<std::string> atexit_handler_func_name("a",
                                   llvm::cl::desc("Specify atexit handler name"),
                                   llvm::cl::value_desc("function name"));
 
