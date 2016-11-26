@@ -49,6 +49,11 @@
 #include "llvm/ADT/Twine.h"
 // using llvm::Twine
 
+#include "llvm/Support/CommandLine.h"
+// using llvm::cl::opt
+// using llvm::cl::desc
+// using llvm::cl::value_desc
+
 #include "llvm/Support/raw_ostream.h"
 // using llvm::outs
 // using llvm::errs
@@ -57,6 +62,9 @@
 #include "llvm/Support/Debug.h"
 // using DEBUG macros
 
+
+#include <string>
+// using std::string
 
 #include <utility>
 // using std::pair
@@ -81,6 +89,10 @@
 
 #define PLUGIN_ERR llvm::errs()
 
+
+llvm::cl::opt<std::string> atexit_handler_func_name("f",
+                                  llvm::cl::desc("Specify atexit handler name"),
+                                  llvm::cl::value_desc("function name"));
 
 namespace {
 
