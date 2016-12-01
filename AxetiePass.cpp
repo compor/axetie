@@ -90,9 +90,11 @@
 #define PLUGIN_ERR llvm::errs()
 
 
-llvm::cl::opt<std::string> atexit_handler_func_name("a",
+llvm::cl::list<std::string> atexit_handler_func_names("a",
                                   llvm::cl::desc("Specify atexit handler name"),
-                                  llvm::cl::value_desc("function name"));
+                                  llvm::cl::value_desc("function name"),
+                                                      llvm::cl::Required,
+                                                      llvm::cl::OneOrMore);
 
 namespace {
 
@@ -224,7 +226,8 @@ namespace {
 
       auto insertion_pt = const_cast<llvm::Function*>(entry)->getEntryBlock().getFirstInsertionPt();
 
-      is_modified = addAtexitCall({ atexit_handler_func_name.c_str() }, *insertion_pt);
+      for (const auto &ahandler_name : atexit_handler_func_names)
+        is_modified = addAtexitCall({ ahandler_name.c_str() }, *insertion_pt);
 
 #ifndef NDEBUG
       llvm::verifyModule(cur_module, &(PLUGIN_ERR));
