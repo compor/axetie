@@ -46,13 +46,18 @@
 #include "llvm/ADT/StringRef.h"
 // using llvm::StringRef
 
+#include "llvm/ADT/ArrayRef.h"
+// using llvm::ArrayRef
+
 #include "llvm/ADT/Twine.h"
 // using llvm::Twine
 
 #include "llvm/Support/CommandLine.h"
-// using llvm::cl::opt
+// using llvm::cl::list
 // using llvm::cl::desc
 // using llvm::cl::value_desc
+// using llvm::cl::Required
+// using llvm::cl::OneOrMore
 
 #include "llvm/Support/raw_ostream.h"
 // using llvm::outs
@@ -109,16 +114,20 @@ namespace {
       cur_context = nullptr;
     }
 
-    const llvm::Function *getEntryFunction(const llvm::Module &module) const {
+    decltype(auto) getEntryFunction(const llvm::Module &module) const {
+      decltype(&*module.begin()) entry = nullptr;
+
       for (auto &CurFunc : module) {
-        if (CurFunc.getName().compare("main") == 0)
-          return &CurFunc;
+        if (CurFunc.getName().compare("main") == 0) {
+          entry = &CurFunc;
+          break;
+        }
       }
 
-      return nullptr;
+      return entry;
     }
 
-    llvm::Function *createAtexitProto(llvm::Module &module) {
+    decltype(auto) createAtexitProto(llvm::Module &module) {
       assert(nullptr != cur_context);
 
       //TODO there should be a more elaborate type check here
@@ -141,7 +150,7 @@ namespace {
       return atexit_found;
     }
 
-    llvm::Function *createExitHandlerProto(const llvm::StringRef &name,
+    decltype(auto) createExitHandlerProto(const llvm::StringRef &name,
                                            llvm::Module &module) {
       assert(nullptr != cur_context);
 
@@ -157,7 +166,7 @@ namespace {
       return atexit_handler;
     }
 
-    std::pair<llvm::CallInst *, llvm::Function *>
+    decltype(auto)
     createAtexitCall(const llvm::StringRef &name, llvm::Module &module) {
       assert(name.compare(atexit_func_name) != 0);
 
